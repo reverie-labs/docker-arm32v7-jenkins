@@ -1,6 +1,6 @@
-FROM openjdk:8-jdk
+FROM resin/rpi-raspbian
 
-RUN apt-get update && apt-get install -y git curl && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y git curl oracle-java8-jdk && rm -rf /var/lib/apt/lists/*
 
 ARG user=jenkins
 ARG group=jenkins
@@ -28,20 +28,20 @@ VOLUME /var/jenkins_home
 RUN mkdir -p /usr/share/jenkins/ref/init.groovy.d
 
 ENV TINI_VERSION 0.14.0
-ENV TINI_SHA 6c41ec7d33e857d4779f14d9c74924cab0c7973485d2972419a3b7c7620ff5fd
+ENV TINI_SHA a3a93909aedf67d6b51c1dc40f63d3caf5ec1f5bc2619fc1daaa9ff81ab1ef26
 
 # Use tini as subreaper in Docker container to adopt zombie processes 
-RUN curl -fsSL https://github.com/krallin/tini/releases/download/v${TINI_VERSION}/tini-static-amd64 -o /bin/tini && chmod +x /bin/tini \
+RUN curl -fsSL https://github.com/krallin/tini/releases/download/v${TINI_VERSION}/tini-static-armhf -o /bin/tini && chmod +x /bin/tini \
   && echo "$TINI_SHA  /bin/tini" | sha256sum -c -
 
 COPY init.groovy /usr/share/jenkins/ref/init.groovy.d/tcp-slave-agent-port.groovy
 
 # jenkins version being bundled in this docker image
-ARG JENKINS_VERSION
+ARG JENKINS_VERSION=2.73
 ENV JENKINS_VERSION ${JENKINS_VERSION:-2.60.2}
 
 # jenkins.war checksum, download will be validated using it
-ARG JENKINS_SHA=14d0788d89be82958a46965de039a55813f9727bd4d0592dc77905976483ba95
+ARG JENKINS_SHA=68db613f303b2374758b562448e1d571fb3c7c98aa2f6de0aa540ff5e51638e1
 
 # Can be used to customize where jenkins.war get downloaded from
 ARG JENKINS_URL=https://repo.jenkins-ci.org/public/org/jenkins-ci/main/jenkins-war/${JENKINS_VERSION}/jenkins-war-${JENKINS_VERSION}.war
