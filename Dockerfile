@@ -1,4 +1,10 @@
-FROM resin/rpi-raspbian
+FROM resin/rpi-raspbian:latest
+MAINTAINER Guto Andreollo <gutoandreollo@users.noreply.github.com>
+
+# This image uses cross-build to build on x86_64 hosts. See details on
+# https://resin.io/blog/building-arm-containers-on-any-x86-machine-even-dockerhub/
+
+RUN [ "cross-build-start" ]
 
 RUN apt-get update && apt-get install -y git curl oracle-java8-jdk && rm -rf /var/lib/apt/lists/*
 
@@ -54,6 +60,8 @@ RUN curl -fsSL ${JENKINS_URL} -o /usr/share/jenkins/jenkins.war \
 ENV JENKINS_UC https://updates.jenkins.io
 ENV JENKINS_UC_EXPERIMENTAL=https://updates.jenkins.io/experimental
 RUN chown -R ${user} "$JENKINS_HOME" /usr/share/jenkins/ref
+
+RUN [ "cross-build-end" ]
 
 # for main web interface:
 EXPOSE ${http_port}
